@@ -71,15 +71,27 @@ app.get('/authenticateUser/:username/:password', (req, res) => {
  * Allows a user to pay another user; user must specify
  * recipient's username and payment amount.
  */
-app.post('/pay', (req, res) => {
-    
+app.post('/pay/:recipientusername/:userconnectorname/:amount', (req, res) => {
+    var xhr = new XMLHttpRequest();
+    xhr.open("POST", connectorAdminUrl + `/accounts/${req.params.userconnectorname}/payments`, true);
+    xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.setRequestHeader('Authorization', 'Bearer admin-token-145609b8fcd2489420e118493bda47dc4e93ea56');
+
+    xhr.onerror = function () {
+        res.status(500).send(xhr.response);
+    };
+    xhr.send(JSON.stringify({
+            "receiver": req.params.recipientusername,
+            "source_amount": req.params.amount
+        }
+    ));
 });
 
 /**
  * Allows a user to create a new ledger account to their 
  * list of stored accounts. 
  */
-app.post('/addUserAccount', (req, res) => {
+app.post('/addUserAccount/:', (req, res) => {
     // adds a user account to a user
 });
 

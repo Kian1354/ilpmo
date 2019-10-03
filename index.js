@@ -15,7 +15,7 @@ app.listen(3000, () => {
             throw error;
         }
         database = client.db(DATABASE_NAME);
-        collection = database.collection("people");
+        collection = database.collection("users");
         console.log("Connected to `" + DATABASE_NAME + "`!");
     });
 });
@@ -31,8 +31,13 @@ app.post('/createUser', (req, res) => {
 /**
  * Authenticates a username/pw combo for login.
  */
-app.get('/authenticateUser', (req, res) => {
-
+app.get('/authenticateUser/:username/:password', (req, res) => {
+    collection.findOne({"username": req.params.username}, (error, result) => {
+        if (error) {
+            return res.status(500).send(error);
+        }
+        res.send(result)
+    })
 })
 
 /**

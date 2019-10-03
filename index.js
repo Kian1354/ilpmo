@@ -117,7 +117,7 @@ app.post('/addUserAccount/:webusername/:webpassword/:ilpusername/:assetcode/:whi
     ));
 });
 
-app.get('/getUserAccounts/:webusername/:webpassword', (req, res) => {
+app.get('/getUserAccounts/:webusername/:webpassword/:whichConnector', (req, res) => {
     const whichConnector = req.params.whichConnector;
 
     const connectorAdminUrl = "https://" + whichConnector +".localtunnel.me/";
@@ -132,22 +132,26 @@ app.get('/getUserAccounts/:webusername/:webpassword', (req, res) => {
             console.log("No document matches the provided query.")
         }
     });
+});
+
+
+app.get('/getUserAccountBalance/:ilpusername/:whichConnector', (req, res) => {
+    const whichConnector = req.params.whichConnector;
+
+    const connectorAdminUrl = "https://" + whichConnector +".localtunnel.me/";
     const xhr = new XMLHttpRequest();
-    xhr.open("POST", connectorAdminUrl + '/accounts', true);
+    xhr.onreadystatechange == function() {
+        if (xhr.readyState == XMLHttpRequest.DONE) {
+            res.send(xhr.responseText);
+        }
+    }
+    xhr.open("GET", connectorAdminUrl + 'accounts/' + req.params.ilpusername + '/balance', true);
     xhr.setRequestHeader('Content-Type', 'application/json');
     xhr.setRequestHeader('Authorization', 'Bearer ' + connectorInfo[whichConnector]);
-    xhr.onload = function() {
-
-    };
     xhr.onerror = function () {
         res.status(500).send(xhr.response);
     };
-    xhr.send(JSON.stringify({
-            "username": req.params.ilpusername,
-            "asset_code": req.params.assetcode,
-            "asset_scale": 9
-        }
-    ));
+    xhr.send(null);
 });
 
 

@@ -18,6 +18,7 @@
   "homepage": "https://github.com/Kian1354/ilpmo#readme",
   "dependencies": {
     "express": "^4.17.1",
-    "mongodb": "^3.3.2"
+    "mongodb": "^3.3.2",
+    "xmlhttprequest": "^1.8.0"
   }
 }

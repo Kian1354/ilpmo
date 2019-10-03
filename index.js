@@ -91,12 +91,15 @@ app.post('/addUserAccount/:webusername/:webpassword/:ilpusername/:assetcode/:whi
     xhr.setRequestHeader('Authorization', 'Bearer ' + connectorInfo[whichConnector]);
     xhr.onload = function() {
         console.log('account creation...');
-        collection.findOne({
+        collection.replaceOne({
             username: req.params.webusername,
             password: req.params.webpassword,
+        }, {
+            $push: {
+                accounts: req.params.ilpusername
+            }
         }).then(result => {
             if(result) {
-                result.accounts.push(req.params.ilpusername);
                 res.send(`Successfully found document: ${result}.`)
             } else {
                 res.send("No document matches the provided query.")

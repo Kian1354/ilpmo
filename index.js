@@ -33,6 +33,7 @@ app.post("/createuser/:username/:password", (req, res) => {
     collection.insertOne({
         username: req.params.username,
         password: req.params.password,
+        ilp_address: null,
         accounts: []
 
     }, (error, result) => {
@@ -93,17 +94,12 @@ app.post('/addUserAccount/:webusername/:webpassword/:ilpusername/:assetcode/:whi
         collection.findOne({
             username: req.params.webusername,
             password: req.params.webpassword,
-        }, (error, result) => {
-            if(error) {
-                return res.status(500).send(error);
-            }
-            res.send(result.result);
         }).then(result => {
             if(result) {
-                console.log(`Successfully found document: ${result}.`)
                 result.accounts.push(req.params.ilpusername);
+                res.send(`Successfully found document: ${result}.`)
             } else {
-                console.log("No document matches the provided query.")
+                res.send("No document matches the provided query.")
             }
         });
     };
@@ -125,11 +121,6 @@ app.get('/getUserAccounts/:webusername/:webpassword', (req, res) => {
     collection.findOne({
         username: req.params.webusername,
         password: req.params.webpassword,
-    }, (error, result) => {
-        if(error) {
-            return res.status(500).send(error);
-        }
-        res.send(result.result);
     }).then(result => {
         if(result) {
             console.log(`Successfully found document: ${result}.`)

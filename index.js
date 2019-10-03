@@ -57,9 +57,14 @@ app.post("/createuser/:username/:password", (req, res) => {
 /**
  * Authenticates a username/pw combo for login.
  */
-app.get('/authenticateUser', (req, res) => {
-
-});
+app.get('/authenticateUser/:username/:password', (req, res) => {
+    collection.findOne({"username": req.params.username}, (error, result) => {
+        if (error) {
+            return res.status(500).send(error);
+        }
+        res.send(result)
+    })
+})
 
 /**
  * Allows a user to pay another user; user must specify

@@ -80,7 +80,7 @@ app.post('/pay/:recipientusername/:userconnectorname/:amount', (req, res) => {
  * Allows a user to create a new ledger account to their 
  * list of stored accounts. 
  */
-app.post('/addUserAccount/:webusername/:webpassword/:ilpusername/:assetcode/:whichConnector', (req, res) => {
+app.post('/addUserAccount/:webusername/:webpassword/:assetcode/:whichConnector', (req, res) => {
     const whichConnector = req.params.whichConnector;
 
     const connectorAdminUrl = "https://" + whichConnector +".localtunnel.me/";
@@ -91,26 +91,24 @@ app.post('/addUserAccount/:webusername/:webpassword/:ilpusername/:assetcode/:whi
     xhr.setRequestHeader('Authorization', 'Bearer ' + connectorInfo[whichConnector]);
     xhr.onload = function() {
         console.log('account creation...');
-        collection.replaceOne({
-            username: req.params.webusername,
-            password: req.params.webpassword,
-        }, {
-            $push: {
-                accounts: req.params.ilpusername
+        collection.insertOne({
+            username: req.params.username,
+            password: req.params.password,
+            ilp_address: null,
+            accounts: []
+
+        }, (error, result) => {
+            if(error) {
+                return res.status(500).send(error);
             }
-        }).then(result => {
-            if(result) {
-                res.send(`Successfully found document: ${result}.`)
-            } else {
-                res.send("No document matches the provided query.")
-            }
+            res.send(result.result);
         });
     };
     xhr.onerror = function () {
         res.status(500).send(xhr.response);
     };
     xhr.send(JSON.stringify({
-            "username": req.params.ilpusername,
+            "username": req.params.webusername,
             "asset_code": req.params.assetcode,
             "asset_scale": 9
         }

@@ -22,19 +22,13 @@ app.listen(3000, () => {
         console.log("Connected to `" + DATABASE_NAME + "`!");
     });
 });
-/**
- * Creates a user on initial login; stores their credentials
- * in our DB. 
- */
-app.post('/createUser', (req, res) => {
-
-});
 
 /**
- * Authenticates a username/pw combo for login.
+ * Authenticates/gets a username/pw combo for login.
  */
 app.get('/authenticateUser/:username/:password', (req, res) => {
-    collection.findOne({"username": req.params.username}, (error, result) => {
+    collection.findOne({"username": req.params.username,
+                        "password": req.params.password}, (error, result) => {
         if (error) {
             return res.status(500).send(error);
         }

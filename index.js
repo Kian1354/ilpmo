@@ -60,7 +60,10 @@ app.get('/authenticateUser/:username/:password', (req, res) => {
  * Allows a user to pay another user; user must specify
  * recipient's username and payment amount.
  */
-app.post('/pay/:recipientusername/:userconnectorname/:amount', (req, res) => {
+app.post('/pay/:recipientusername/:userconnectorname/:amount/:whichConnector', (req, res) => {
+    const whichConnector = req.params.whichConnector;
+
+    const connectorAdminUrl = "https://" + whichConnector +".localtunnel.me/";
     var xhr = new XMLHttpRequest();
     xhr.open("POST", connectorAdminUrl + `/accounts/${req.params.userconnectorname}/payments`, true);
     xhr.setRequestHeader('Content-Type', 'application/json');
@@ -70,7 +73,7 @@ app.post('/pay/:recipientusername/:userconnectorname/:amount', (req, res) => {
         res.status(500).send(xhr.response);
     };
     xhr.send(JSON.stringify({
-            "receiver": req.params.recipientusername,
+            "receiver": "$" + whichConnector + ".localtunnel.me",
             "source_amount": req.params.amount
         }
     ));
@@ -134,22 +137,65 @@ app.get('/getUserAccounts/:webusername/:webpassword/:whichConnector', (req, res)
 
 
 app.get('/getUserAccountBalance/:ilpusername/:whichConnector', (req, res) => {
-    const whichConnector = req.params.whichConnector;
-
-    const connectorAdminUrl = "https://" + whichConnector +".localtunnel.me/";
-    const xhr = new XMLHttpRequest();
-    xhr.onreadystatechange == function() {
-        if (xhr.readyState == XMLHttpRequest.DONE) {
-            res.send(xhr.responseText);
+    var data = JSON.stringify(false);
+    var xhr = new XMLHttpRequest();
+    xhr.withCredentials = true;
+    xhr.addEventListener("readystatechange", function () {
+        if (this.readyState === 4) {
+            console.log(this.responseText);
+            res.send(this.responseText);
         }
-    }
-    xhr.open("GET", connectorAdminUrl + 'accounts/' + req.params.ilpusername + '/balance', true);
-    xhr.setRequestHeader('Content-Type', 'application/json');
-    xhr.setRequestHeader('Authorization', 'Bearer ' + connectorInfo[whichConnector]);
-    xhr.onerror = function () {
-        res.status(500).send(xhr.response);
-    };
-    xhr.send(null);
+    });
+    xhr.open("GET", "https://connector2.localtunnel.me/accounts/connector2/balance");
+    xhr.setRequestHeader("Content-Type", "application/json");
+    xhr.setRequestHeader("Authorization", "Bearer connector2:connector2");
+
+    xhr.send(data);
+
+});
+
+app.post('/twotoone', (req, res) => {
+    var data = JSON.stringify({
+        "receiver": "$connector1.localtunnel.me",
+        "source_amount": 100
+    });
+
+    var xhr = new XMLHttpRequest();
+    xhr.withCredentials = true;
+
+    xhr.addEventListener("readystatechange", function () {
+        if (this.readyState === 4) {
+            console.log(this.responseText);
+        }
+    });
+
+    xhr.open("POST", "https://connector2.localtunnel.me/accounts/connector2/payments");
+    xhr.setRequestHeader("Content-Type", "application/json");
+    xhr.setRequestHeader("Authorization", "Bearer connector2:connector2");
+
+    xhr.send(data);
+});
+
+app.post('/onetotwo', (req, res) => {
+    var data = JSON.stringify({
+        "receiver": "$connector2.localtunnel.me",
+        "source_amount": 99
+    });
+
+    var xhr = new XMLHttpRequest();
+    xhr.withCredentials = true;
+
+    xhr.addEventListener("readystatechange", function () {
+        if (this.readyState === 4) {
+            console.log(this.responseText);
+        }
+    });
+
+    xhr.open("POST", "https://connector1.localtunnel.me/accounts/connector1/payments");
+    xhr.setRequestHeader("Content-Type", "application/json");
+    xhr.setRequestHeader("Authorization", "Bearer connector1:connector1");
+
+    xhr.send(data);
 });
 
 

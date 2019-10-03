@@ -6,9 +6,6 @@ var XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
 const CONNECTION_URL = "mongodb+srv://kian:admin@cluster0-ypndi.mongodb.net/admin?retryWrites=true&w=majority";
 const DATABASE_NAME = "ilpmo";
 
-const whichConnector = "connector1";
-
-const connectorAdminUrl = "https://" + whichConnector +".localtunnel.me/";
 const connectorInfo= {
     'connector1':'admin-token-0a578dcba98f9b9ea124af1961422a18258087de',
     'connector2':'admin-token-145609b8fcd2489420e118493bda47dc4e93ea56'
@@ -70,7 +67,10 @@ app.post('/pay', (req, res) => {
  * Allows a user to create a new ledger account to their 
  * list of stored accounts. 
  */
-app.post('/addUserAccount/:webusername/:webpassword/:ilpusername/:assetcode', (req, res) => {
+app.post('/addUserAccount/:webusername/:webpassword/:ilpusername/:assetcode/:whichConnector', (req, res) => {
+    const whichConnector = req.params.whichConnector;
+
+    const connectorAdminUrl = "https://" + whichConnector +".localtunnel.me/";
     // adds a user account to a user
     const xhr = new XMLHttpRequest();
     xhr.open("POST", connectorAdminUrl + '/accounts', true);
@@ -107,6 +107,25 @@ app.post('/addUserAccount/:webusername/:webpassword/:ilpusername/:assetcode', (r
 });
 
 app.get('/getUserAccounts/:webusername/:webpassword', (req, res) => {
+    const whichConnector = req.params.whichConnector;
+
+    const connectorAdminUrl = "https://" + whichConnector +".localtunnel.me/";
+    collection.findOne({
+        username: req.params.webusername,
+        password: req.params.webpassword,
+    }, (error, result) => {
+        if(error) {
+            return res.status(500).send(error);
+        }
+        res.send(result.result);
+    }).then(result => {
+        if(result) {
+            console.log(`Successfully found document: ${result}.`)
+            res.send(result.accounts);
+        } else {
+            console.log("No document matches the provided query.")
+        }
+    });
     const xhr = new XMLHttpRequest();
     xhr.open("POST", connectorAdminUrl + '/accounts', true);
     xhr.setRequestHeader('Content-Type', 'application/json');
